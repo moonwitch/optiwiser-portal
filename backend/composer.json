@@ -1,0 +1,17 @@
+{
+    "name": "user/backend",
+    "autoload": {
+        "psr-4": {
+            "User\\Backend\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "kelly.crabbe",
+            "email": "kelly.crabbe@gmail.com"
+        }
+    ],
+    "require": {
+        "bramus/router": "^1.6"
+    }
+}
