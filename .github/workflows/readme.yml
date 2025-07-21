@@ -1,0 +1,29 @@
+name: Update README
+
+    on:
+      schedule:
+        # Draait elke 6 uur
+        - cron: "0 */6 * * *"
+      workflow_dispatch:
+
+    jobs:
+      update:
+        runs-on: ubuntu-latest
+        steps:
+          - name: Checkout Repo
+            uses: actions/checkout@v3
+
+          - name: Get current milestone
+            id: milestone
+            run: |
+              # Pakt de oudste open milestone
+              MILESTONE_TITLE=$(gh milestone list --state open --json title --jq '.[0].title' | sed 's/ / /g')
+              echo "milestone=$MILESTONE_TITLE" >> $GITHUB_OUTPUT
+
+          - name: Update README with open issues
+            uses: gautamkrishnar/blog-post-workflow@v1
+            with:
+              comment_tag_name: "ISSUES_LIST"
+              feed_list: "https://github.com/moonwitch/optiwiser-portal/issues?q=is:open+is:issue+milestone:${{ steps.milestone.outputs.milestone }}"
+              max_post_count: 5
+              template: "| $title | $url |"
