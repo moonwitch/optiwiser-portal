@@ -2,9 +2,7 @@ name: Update README with Current Issues
 
 on:
   schedule:
-    # Draait elke 6 uur
     - cron: "0 */6 * * *"
-  # Maakt het mogelijk om de workflow handmatig te starten
   workflow_dispatch:
 
 jobs:
@@ -12,56 +10,47 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+
     steps:
       - name: Check out repo
         uses: actions/checkout@v4
 
-      - name: Get current milestone via GraphQL API
+      - name: Get current milestone
         id: milestone
         env:
           GH_TOKEN: ${{ github.token }}
-          OWNER: ${{ github.repository_owner }}
-          REPO: ${{ github.event.repository.name }}
         run: |
-          # GraphQL query om de titel van de eerste open milestone op te halen (gesorteerd op deadline)
-          query=$(cat << 'GRAPHQL'
-          query($owner: String!, $repo: String!) {
-            repository(owner: $owner, name: $repo) {
-              milestones(states: OPEN, first: 1, orderBy: {field: DUE_DATE, direction: ASC}) {
-                nodes {
-                  title
+          MILESTONE_TITLE=$(gh api graphql -f query='
+            query($owner: String!, $repo: String!) {
+              repository(owner: $owner, name: $repo) {
+                milestones(states: OPEN, first: 1, orderBy: {field: DUE_DATE, direction: ASC}) {
+                  nodes { title }
                 }
               }
-            }
-          }
-          GRAPHQL
-          )
-          
-          # Voer de API call uit, parse de JSON output met jq, en zet de titel als output voor de volgende stappen
-          MILESTONE_TITLE=$(gh api graphql -f query="$query" -f owner="$OWNER" -f repo="$REPO" | jq -r '.data.repository.milestones.nodes[0].title')
+            }' -f owner='${{ github.repository_owner }}' -f repo='${{ github.event.repository.name }}' | jq -r '.data.repository.milestones.nodes[0].title')
           echo "title=$MILESTONE_TITLE" >> $GITHUB_OUTPUT
 
-      - name: Fetch issues for milestone
+      - name: Fetch and format issues
         id: issues
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          # Haalt de 5 nieuwste open issues op voor de huidige milestone en formatteert ze als tabelrijen
-          ISSUES_LIST=$(gh issue list --state open --milestone "${{ steps.milestone.outputs.title }}" --limit 5 --json number,title,url --template '{{range .}}| [{{.title}}]({{.url}}) | {{end}}' | sed 's/|/| /g' | sed 's/|$/|/g')
-          echo "issues_table<<EOF" >> $GITHUB_OUTPUT
+          # Haal de issues op en formatteer ze als Markdown tabelrijen
+          ISSUES_LIST=$(gh issue list --state open --milestone "${{ steps.milestone.outputs.title }}" --limit 5 --json title,url --template '{{range .}}| [{{.title}}]({{.url}}) |{{printf "\n"}}{{end}}')
+          # Maak een multiline string voor de vervanging in de volgende stap
+          echo "markdown_table<<EOF" >> $GITHUB_OUTPUT
           echo "$ISSUES_LIST" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
-      
-      - name: Update README.md
+
+      - name: Update README file
         run: |
           # Lees de README, vervang de content tussen de markers, en schrijf terug
-          awk '//{p=1;print;print "${{ steps.issues.outputs.issues_table }}";next} //{p=0} !p' README.md > README.md.tmp
-          mv README.md.tmp README.md
+          # Dit is een robuustere methode
+          python3 -c "import re; f=open('README.md','r+'); content=f.read(); result=re.sub(r'.*', '\n${{ steps.issues.outputs.markdown_table }}', content, flags=re.DOTALL); f.seek(0); f.truncate(); f.write(result)"
 
       - name: Commit and push if changed
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git add README.md
-          # Alleen committen en pushen als er daadwerkelijk iets is veranderd
           git diff --quiet && git diff --staged --quiet || (git commit -m "docs: update milestone issues in README" && git push)
