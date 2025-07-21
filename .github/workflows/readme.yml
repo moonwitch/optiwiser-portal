@@ -40,12 +40,9 @@ jobs:
           ISSUES_LIST=$(gh issue list --state open --milestone "${{ steps.milestone.outputs.title }}" --limit 5 --json title,url --template '{{range .}}| [{{.title}}]({{.url}}) |%0A{{end}}')
           echo "ISSUES_TABLE=$ISSUES_LIST" >> $GITHUB_ENV
 
-      - name: Replace token in README
-        uses: cuchi/file-token-replacer@v1
-        with:
-          file: 'README.md'
-          token: '__MILESTONE_ISSUES__'
-          replace: ${{ env.ISSUES_TABLE }}
+      - name: Replace __MILESTONE_ISSUES__
+        run: |
+          sed -i 's/__MILESTONE_ISSUES__/${{ env.ISSUES_TABLE }}/g' README.md
 
       - name: Commit and push if changed
         run: |
