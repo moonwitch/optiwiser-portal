@@ -70,7 +70,9 @@ graph TD
 Dit project wordt ontwikkeld aan de hand van Milestones. We werken momenteel aan M1: Backend Foundation.
 
 Open Taken voor de Huidige Milestone
-| Taak | Link | |:---|:---| Hier komt straks een automatisch gegenereerde lijst met taken
+| Taak | Link |
+|:---|:---|
+__MILESTONE_ISSUES__
 
 ## 🚀 Local Development
 

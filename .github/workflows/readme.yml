@@ -30,23 +30,22 @@ jobs:
             }' -f owner='${{ github.repository_owner }}' -f repo='${{ github.event.repository.name }}' | jq -r '.data.repository.milestones.nodes[0].title')
           echo "title=$MILESTONE_TITLE" >> $GITHUB_OUTPUT
 
-      - name: Fetch and format issues
+      - name: Fetch issues and format them
         id: issues
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          # Haal de issues op en formatteer ze als Markdown tabelrijen
-          ISSUES_LIST=$(gh issue list --state open --milestone "${{ steps.milestone.outputs.title }}" --limit 5 --json title,url --template '{{range .}}| [{{.title}}]({{.url}}) |{{printf "\n"}}{{end}}')
-          # Maak een multiline string voor de vervanging in de volgende stap
-          echo "markdown_table<<EOF" >> $GITHUB_OUTPUT
-          echo "$ISSUES_LIST" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          # Haalt de issues op en formatteert ze als Markdown tabelrijen
+          # De '%0A' aan het eind zorgt voor een correcte newline karakter
+          ISSUES_LIST=$(gh issue list --state open --milestone "${{ steps.milestone.outputs.title }}" --limit 5 --json title,url --template '{{range .}}| [{{.title}}]({{.url}}) |%0A{{end}}')
+          echo "ISSUES_TABLE=$ISSUES_LIST" >> $GITHUB_ENV
 
-      - name: Update README file
-        run: |
-          # Lees de README, vervang de content tussen de markers, en schrijf terug
-          # Dit is een robuustere methode
-          python3 -c "import re; f=open('README.md','r+'); content=f.read(); result=re.sub(r'.*', '\n${{ steps.issues.outputs.markdown_table }}', content, flags=re.DOTALL); f.seek(0); f.truncate(); f.write(result)"
+      - name: Replace token in README
+        uses: cuchi/file-token-replacer@v1
+        with:
+          file: 'README.md'
+          token: '__MILESTONE_ISSUES__'
+          replace: ${{ env.ISSUES_TABLE }}
 
       - name: Commit and push if changed
         run: |
