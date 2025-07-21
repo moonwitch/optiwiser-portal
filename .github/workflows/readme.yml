@@ -47,7 +47,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           # Haalt de 5 nieuwste open issues op voor de huidige milestone en formatteert ze als tabelrijen
-          ISSUES_LIST=$(gh issue list --state open --milestone "${{ steps.milestone.outputs.title }}" --limit S --json number,title,url --template '{{range .}}| [{{.title}}]({{.url}}) | {{end}}' | sed 's/|/| /g' | sed 's/|$/|/g')
+          ISSUES_LIST=$(gh issue list --state open --milestone "${{ steps.milestone.outputs.title }}" --limit 5 --json number,title,url --template '{{range .}}| [{{.title}}]({{.url}}) | {{end}}' | sed 's/|/| /g' | sed 's/|$/|/g')
           echo "issues_table<<EOF" >> $GITHUB_OUTPUT
           echo "$ISSUES_LIST" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
