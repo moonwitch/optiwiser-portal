@@ -72,7 +72,7 @@ Dit project wordt ontwikkeld aan de hand van Milestones. We werken momenteel aan
 Open Taken voor de Huidige Milestone
 | Taak | Link |
 |:---|:---|
-__MILESTONE_ISSUES__
+| [Backend CRUD API voor Klanten](https://github.com/moonwitch/optiwiser-portal/issues/38) |%0A| [Backend voor Authenticatie bouwen](https://github.com/moonwitch/optiwiser-portal/issues/35) |%0A
 
 ## 🚀 Local Development
 
