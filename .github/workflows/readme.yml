@@ -42,7 +42,7 @@ jobs:
 
       - name: Replace __MILESTONE_ISSUES__
         run: |
-          sed -i 's/__MILESTONE_ISSUES__/${{ env.ISSUES_TABLE }}/g' README.md
+          sed -i 's#__MILESTONE_ISSUES__#${{ env.ISSUES_TABLE }}#g' README.md
 
       - name: Commit and push if changed
         run: |
