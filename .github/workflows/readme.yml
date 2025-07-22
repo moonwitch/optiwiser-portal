@@ -37,12 +37,12 @@ jobs:
         run: |
           # Haalt de issues op en formatteert ze als Markdown tabelrijen
           # De '%0A' aan het eind zorgt voor een correcte newline karakter
-          ISSUES_LIST=$(gh issue list --state open --milestone "${{ steps.milestone.outputs.title }}" --limit 5 --json title,url --template '{{range .}}| [{{.title}}]({{.url}}) |%0A{{end}}')
+          ISSUES_LIST=$(gh issue list --state open --milestone "${{ steps.milestone.outputs.title }}" --limit 5 --json title,url --template '{{range .}} | {{.title}} | {{.url}} |%0A{{end}}')
           echo "ISSUES_TABLE=$ISSUES_LIST" >> $GITHUB_ENV
 
-      - name: Replace __MILESTONE_ISSUES__
+      - name: Replace "Open Taken voor de Huidige Milestone"
         run: |
-          sed -i 's#__MILESTONE_ISSUES__#${{ env.ISSUES_TABLE }}#g' README.md
+          sed -i 's#Open Taken voor de Huidige Milestone#Open Taken voor de Huidige Milestone %0A ${{ env.ISSUES_TABLE }}#g' README.md
 
       - name: Commit and push if changed
         run: |
