@@ -1,10 +1,3 @@
-
-| [Backend CRUD API voor Klanten](https://github.com/moonwitch/optiwiser-portal/issues/38) |
-| [Backend voor Authenticatie bouwen](https://github.com/moonwitch/optiwiser-portal/issues/35) |
-
-| [Backend CRUD API voor Klanten](https://github.com/moonwitch/optiwiser-portal/issues/38) |
-| [Backend voor Authenticatie bouwen](https://github.com/moonwitch/optiwiser-portal/issues/35) |
-
 # Optiwiser-Portal
 
 [![Status CI/CD](https://github.com/moonwitch/optiwiser-portal/actions/workflows/update_readme.yml/badge.svg)](https://github.com/moonwitch/optiwiser-portal/actions)
