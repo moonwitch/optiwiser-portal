@@ -30,19 +30,42 @@ jobs:
             }' -f owner='${{ github.repository_owner }}' -f repo='${{ github.event.repository.name }}' | jq -r '.data.repository.milestones.nodes[0].title')
           echo "title=$MILESTONE_TITLE" >> $GITHUB_OUTPUT
 
-      - name: Fetch issues and format them
-        id: issues
+      - name: Fetch issues to a file
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          # Haalt de issues op en formatteert ze als Markdown tabelrijen
-          # De '%0A' aan het eind zorgt voor een correcte newline karakter
-          ISSUES_LIST=$(gh issue list --state open --milestone "${{ steps.milestone.outputs.title }}" --limit 5 --json title,url --template '{{range .}} | {{.title}} | {{.url}} |%0A{{end}}')
-          echo "ISSUES_TABLE=$ISSUES_LIST" >> $GITHUB_ENV
+          # Schrijf de output direct naar een tijdelijk bestand in plaats van een variabele
+          gh issue list --state open --milestone "${{ steps.milestone.outputs.title }}" --limit 5 --json title,url --template '{{range .}}| [{{.title}}]({{.url}}) |
+          {{end}}' > issues_list.md
 
-      - name: Replace "Open Taken voor de Huidige Milestone"
+      - name: Update README.md using Python
         run: |
-          sed -i 's#Open Taken voor de Huidige Milestone#Open Taken voor de Huidige Milestone %0A ${{ env.ISSUES_TABLE }}#g' README.md
+          python3 -c "
+          import re
+
+          # Lees de nieuwe issue-lijst uit het tijdelijke bestand
+          with open('issues_list.md', 'r') as f:
+              issues_table = f.read().strip()
+
+          # Lees de volledige README
+          with open('README.md', 'r') as f:
+              readme_content = f.read()
+
+          # Definieer de start- en eindmarkers
+          start_marker = ''
+          end_marker = ''
+          
+          # Bouw de vervangende content
+          replacement_block = f'{start_marker}\\n{issues_table}\\n{end_marker}'
+
+          # Vervang de content tussen de markers
+          # re.DOTALL zorgt ervoor dat '.' ook newlines matcht
+          updated_readme = re.sub(f'{start_marker}.*{end_marker}', replacement_block, readme_content, flags=re.DOTALL)
+          
+          # Schrijf de bijgewerkte content terug naar de README
+          with open('README.md', 'w') as f:
+              f.write(updated_readme)
+          "
 
       - name: Commit and push if changed
         run: |

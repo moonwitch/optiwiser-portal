@@ -69,10 +69,11 @@ graph TD
 ## 🎯 Project Status & Roadmap
 Dit project wordt ontwikkeld aan de hand van Milestones. We werken momenteel aan M1: Backend Foundation.
 
-Open Taken voor de Huidige Milestone
+### Open Taken voor de Huidige Milestone
+
 | Taak | Link |
 |:---|:---|
-| [Backend CRUD API voor Klanten](https://github.com/moonwitch/optiwiser-portal/issues/38) |%0A| [Backend voor Authenticatie bouwen](https://github.com/moonwitch/optiwiser-portal/issues/35) |%0A
+*Laden van taken...*
 
 ## 🚀 Local Development
 
